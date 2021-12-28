@@ -9,6 +9,7 @@ Rofi script to minimize / unminimize multiple windows in qtile
 #### How to use it :
 
     - Clone the directory and place the file "Qminimize" in a directory in your $PATH
+        E.G. : I have mine in .local/bin but otherwise you can put it in /usr/bin
     
     - Make the file executable with "chmod +x Qminimize"
     
