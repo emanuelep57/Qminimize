@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+from libqtile.command.client import InteractiveCommandClient
+from subprocess import Popen, PIPE
+from configparser import ConfigParser as config_parser
+import sys
+from ewmh import EWMH
+from fuzzywuzzy import fuzz
+import os
+import re
+
+c = InteractiveCommandClient()
+
+#minimize or unminimize single window
+def minimize():
+    if c.window.info()["minimized"] is False:
+        c.window.toggle_minimize()
+        c.group.next_window()
+    else :
+        c.window.toggle_minimize()
+
+# GETS THE WM_CLASS OF ALL THE ACTIVE CLIENTS
+
+def get_wm_class():
+    window_class = []
+    win = EWMH().getClientList()
+    for window in win:
+        window_class.append(window.get_wm_class()[1].lower())
+    return window_class
+
+
+# PARSE ALL THE ICONS OF THE .DESKTOP FILES IN /USR/SHARE/APPLICATIONS
+
+def parse_icons():
+    config = config_parser(interpolation=None)
+    icons = []
+    for i in range (0, len("/usr/share/applications"), 1):
+        file = '/usr/share/applications/'+os.listdir("/usr/share/applications")[i]
+        if os.path.isdir(file) or not file.endswith('.desktop') :
+            continue
+        config.read(file)
+        icons.append(config['Desktop Entry']['Icon'])
+    return icons
+
+
+# MAKES A FUZZY COMPARE BETWEEN  THE ARRAY WITH ALL THE ICONS 
+# AND THE ARRAY WITH THE WM CLASSES. AND IT SAVES THE MOST SIMILAR MATCH FOR ANY WINDOW
+# IN THIS WAY I GET THE NAME OF THE ICON FOR ANY OPEN CLIENT AND SAVE IT IN "ICON2"
+
+def icons_active_windows(icons, window_class):
+    icons2 = []
+    for i in window_class:
+        max = 0
+        for j in icons:       
+            if fuzz.ratio(i, j) > max :
+                max = fuzz.ratio(i, j)
+                valore = j
+        icons2.append(valore)
+    return icons2
+
+
+#HERE I GET ALL THE CLIENTS THAT ARE MINIMIZED, ADD THEIR NAME TO A STRING WITH THEIR 
+# MATCHING ICON AND I'LL PASS THE STRING IN MAIN, SO I CAN EXECUTE IT IN ROFI
+
+def minimized_windows_list(minimized_icons):
+    string = ""
+    windows = (c.items("window")[1][1:])
+    for i in windows:
+        cont = windows.index(i)
+        if c.window[i].info()["minimized"] is True:
+            string += "{} {}\\0icon\\x1f{}".format(c.window[i].info()["name"], str(c.window[i].info()["id"]), minimized_icons[cont])
+            if cont < len(windows) - 1:
+                string += "\n"
+    return string
+
+
+def main():
+
+    if sys.argv[1] == "-m":
+        minimize()
+        
+    elif sys.argv[1] == "-u":    
+        window_class = get_wm_class()
+        icons = parse_icons()
+        minimized_icons = icons_active_windows(icons, window_class)
+        string = minimized_windows_list(minimized_icons)
+        command = "echo -en '{}'| rofi -dmenu -multi-select".format(string)
+        result = Popen(command, universal_newlines=True, shell=True, stdout=PIPE).stdout.read()
+        result = list(result[:-1].split("\n"))
+        result = list(map(int,([re.sub("[^0-9]", "", result[i]) for i in range(0, len(result))])))
+        for i in result:
+            c.window[i].toggle_minimize()
+            
+    elif sys.argv[1] not in ["-m", "-u"]  or sys.argv[1] is None:
+        print('-m to minimize or -u to unminimize')
+        sys.exit()
+
+if __name__ == "__main__":
+    main()
