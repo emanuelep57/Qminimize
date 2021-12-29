@@ -2,11 +2,10 @@
 from libqtile.command.client import InteractiveCommandClient
 from subprocess import Popen, PIPE
 from configparser import ConfigParser as config_parser
-import sys
 from ewmh import EWMH
 from fuzzywuzzy import fuzz
 import os
-import re
+import sys
 
 c = InteractiveCommandClient()
 
@@ -86,7 +85,8 @@ def main():
         command = "echo -en '{}'| rofi -dmenu -multi-select".format(string)
         result = Popen(command, universal_newlines=True, shell=True, stdout=PIPE).stdout.read()
         result = list(result[:-1].split("\n"))
-        result = list(map(int,([re.sub("[^0-9]", "", result[i]) for i in range(0, len(result))])))
+        result = list(map(int,([ result[i].rsplit(None, 1)[-1] for i in range(0, len(result))])))
+        print(result)
         for i in result:
             c.window[i].toggle_minimize()
             
