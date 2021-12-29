@@ -86,7 +86,6 @@ def main():
         result = Popen(command, universal_newlines=True, shell=True, stdout=PIPE).stdout.read()
         result = list(result[:-1].split("\n"))
         result = list(map(int,([ result[i].rsplit(None, 1)[-1] for i in range(0, len(result))])))
-        print(result)
         for i in result:
             c.window[i].toggle_minimize()
             
