@@ -65,7 +65,7 @@ def minimized_windows_list(minimized_icons):
     windows = (c.items("window")[1][1:])
     for i in windows:
         cont = windows.index(i)
-        if c.window[i].info()["minimized"] is True:
+        if "minimized" in c.window[i].info() and c.window[i].info()["minimized"] is True:
             string += "{} {}\\0icon\\x1f{}".format(c.window[i].info()["name"], str(c.window[i].info()["id"]), minimized_icons[cont])
             if cont < len(windows) - 1:
                 string += "\n"
