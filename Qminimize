@@ -32,7 +32,7 @@ def get_wm_class():
 def parse_icons():
     config = config_parser(interpolation=None)
     icons = []
-    for i in range (0, len("/usr/share/applications"), 1):
+    for i in range (0, len([item for item in os.listdir("/usr/share/applications")]), 1):
         file = '/usr/share/applications/'+os.listdir("/usr/share/applications")[i]
         if os.path.isdir(file) or not file.endswith('.desktop') :
             continue
