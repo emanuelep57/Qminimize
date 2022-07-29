@@ -1,0 +1,6 @@
+configuration {
+  show-icons:         true;
+  icon-theme:         "Papirus-Dark";
+  modi: "drun";
+}
+@theme "eos-qtile"
