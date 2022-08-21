@@ -1,4 +1,4 @@
-# Qminimize
+# Qminimize UNMANTAINED
 Rofi script to minimize / unminimize multiple windows in qtile
 
 #### Additional requirements :
